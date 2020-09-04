@@ -1,11 +1,9 @@
-const splitByMediaQuery = require('./split-by-media-query')
-const sortByMediaQuery = require('./sort-media-queries')
+const {splitByMediaQuery, sortByMediaQuery}  = require('./split-by-media-query')
 const {buildCombinedFilename, buildFilename} = require('./build-filenames')
 
 const printMessage = require('print-message');
 
 const pluginName = 'neris-media-query-extract-plugin'
-
 
 const createStylesheet = ({compilation,contents,filename}) => {
   compilation.assets[filename] = {
