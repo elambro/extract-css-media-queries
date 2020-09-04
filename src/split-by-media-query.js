@@ -2,40 +2,48 @@ const css            = require('css')
 const matchesQueries = require('./matches-queries')
 const printMessage   = require('print-message');
 
+
+const extractQueries = ({rules, queries, options}) => {
+
+  let common = [];
+  let extracted = [];
+  let results = [];
+
+  rules.forEach( rule => {
+
+    let { type, media } = rule;
+    let isMedia = type === 'media';
+
+    if (isMedia && matchesQueries({ media, queries, options })) {
+
+      extracted.push(rule)
+      results.push(`✓ ${media}`);
+
+    } else {
+
+      common.push(rule)
+      isMedia && results.push(`X ${media}`);
+
+    }
+  })
+
+  return {common, extracted, results};
+
+}
+
 const splitByMediaQuery = ({ cssFile, queries, options={}, name="chunk" }) => {
 
   const output      = {}
   const inputRules  = css.parse(cssFile).stylesheet.rules
-  const outputRules = {
-    common   : [],
-    extracted: []
-  }
 
   const results = [];
 
-  inputRules.forEach(({ type, media }, index) => {
-    
-    const rule = inputRules[index]
+  let {common, extracted, results} = extractQueries({rules: inputRules, queries, options});
 
-    if (type === 'media') {
-
-      const isCustom = matchesQueries({ media, queries, options })
-
-      results.push((isCustom ? '✓' : 'X') + ` ${media}`);
-
-        if (isCustom) {
-          outputRules.extracted.push(rule)
-        } else {
-          outputRules.common.push(rule)
-        }
-    }
-
-    else {
-      outputRules.common.push(rule)
-    }
-  })
+  let outputRules = {common, extracted};
 
   Object.keys(outputRules).forEach((key) => {
+
     output[key]      = []
     const rules      = outputRules[key]
 

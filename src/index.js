@@ -1,6 +1,6 @@
 const handleApply = require('./handle-apply')
 
-const loadOptios = (obj={}) => {
+const parseOptions = (obj={}) => {
   const {type="large", minify=false, filename=`[name].[ext]`, queries=[], verbose=false, combined=false} = obj
   return {
     queries,
@@ -17,7 +17,7 @@ const loadOptios = (obj={}) => {
 module.exports = class MediaQuerySplittingPlugin {
 
   constructor(options) {
-    this.options = loadOptions(options)
+    this.options = parseOptions(options)
   }
 
   apply(compiler) {

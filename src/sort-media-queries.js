@@ -1,7 +1,6 @@
-const css          = require('css')
-const printMessage = require('print-message');
+const css = require('css')
 
-function getQueryWidthFromRule( rule ) {
+const parseScreenWidthFromRule = ( rule ) => {
   // get intval from media query
   let {type, media} = rule;
   let size = null;
@@ -14,32 +13,7 @@ function getQueryWidthFromRule( rule ) {
   return size;
 }
 
-const sortByMediaQuery = (cssFiles=[]) => {
-
-  const output     = {}
-  const ordered    = [];
-  const nonordered = [];
-  const results    = [];
-
-
-  var sortedRules = [];
-  var sizedRules = [];
-
-  // Get an array of all the rules in all the sheets...
-  cssFiles.forEach( cssFile => {
-
-    let RulesWithSizes = css.parse(cssFile).stylesheet.rules.map( (rule, index) => ({
-      rule,
-      size: getQueryWidthFromRule(rule)
-    }));
-
-    // Get all rules as {rule: ..., size: size }
-    sizedRules = [...sizedRules, ...RulesWithSizes];    
-  })
-
-  // Now sort them...
-  
-  sizedRules.sort( (a,b) => {
+const sortBySizeProp = (a,b) => {
 
     if (a.size === null && b.size === null) {
       return 0;
@@ -63,32 +37,59 @@ const sortByMediaQuery = (cssFiles=[]) => {
 
     return 0;
 
-  })
-  
-  sortedRules = sizedRules.map( obj => obj.rule );
+}
 
-  // printMessage(['Got size rules sorted. Now combining them'], {border:false})
+const mergeDuplicateRules = (rules) => {
+    // Merge duplicates media conditions
+  var combined = [];
 
-  // Merge duplicates media conditions
-  var combinedRules = [];
-
-  sortedRules.forEach(rule => {
+  rules.forEach(rule => {
       const { media, rules } = rule
-      const mediaIndex = combinedRules.map(({ media }) => media).indexOf(media)
+      const mediaIndex = combined.map(({ media }) => media).indexOf(media)
       if (!media || mediaIndex < 0) {
-        combinedRules.push(rule)
+        combined.push(rule)
       } else {
-        combinedRules[mediaIndex].rules = combinedRules[mediaIndex].rules.concat(rules)
+        combined[mediaIndex].rules = combined[mediaIndex].rules.concat(rules)
       }
   })
 
-  // Stringify styles
-  const style = css.stringify({
-    type: 'stylesheet',
-    stylesheet: { rules: combinedRules },
-  })
+  return combined;
+}
 
-  return style;
+const stylesheetFrom = (rules) => {
+
+  return css.stringify({
+    type: 'stylesheet',
+    stylesheet: { rules: combined },
+  })
+}
+
+const rulesAsArray = (files) => {
+  let rules = [];
+  files.forEach(file => {
+    rules = [...rules, ...css.parse(file).stylesheet.rules];
+  })
+  return rules;
+}
+
+const sortRulesBySize = (rules) => {
+
+  let mapped = rules.map( (rule, index) => ({rule, size: parseScreenWidthFromRule(rule) }));
+  
+  mapped.sort(sortBySizeProp )
+  
+  return mapped.map( obj => obj.rule );
+}
+
+const sortByMediaQuery = (cssFiles=[]) => {
+
+  let rules = rulesAsArray(cssFiles);
+
+  let sorted = sortRulesBySize(rules);
+
+  let combined = mergeDuplicateRules(sorted);
+
+  return stylesheetFrom(combined);
 }
 
 
