@@ -1,26 +1,30 @@
 const handleApply = require('./handle-apply')
 
-const parseOptions = (obj={}) => {
-  const {type="large", minify=false, filename=`[name].[ext]`, queries=[], verbose=false, combined=false} = obj
-  return {
-    queries,
-    options: {
-      type,
-      minify,
-      filename,
-      verbose,
-      combined
-    }
-  }
-}
-
 module.exports = class MediaQuerySplittingPlugin {
 
   constructor(options) {
-    this.options = parseOptions(options)
+    this.options = options
   }
 
   apply(compiler) {
-      handleApply({compiler,...this.options})
+
+    compiler.plugin('emit', (compilation, callback) => {
+
+      // get stylesheets
+      let sheets = {};
+      
+      Object.keys(compilation.assets)
+        .filter((asset) => /\.css$/.test(asset))
+        .forEach( name => { sheets[name] = compilation.assets[name]; });
+
+      let results = applyPluginToSheets(sheets, this.options);
+
+      Object.keys(results)
+        .forEach( filename => {
+          compilation.assets[filename] = results[filename];
+        })
+
+      callback()
+   })
   }
 }
