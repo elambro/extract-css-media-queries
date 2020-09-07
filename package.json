@@ -1,14 +1,10 @@
 {
   "name": "@elambro/extract-css-media-queries",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A webpack plugin which extracts media queries from your css into separate files",
   "homepage": "https://lambroschini.com/",
   "main": "src/index.js",
-  "scripts": {
-    "transpile": "babel ./src --out-dir ./dist",
-    "minify": "minify ./dist/index.js -d ./dist && minify ./dist/load-options.js -d ./dist && minify ./dist/handle-apply.js -d ./dist && minify ./dist/split-by-media-query.js -d ./dist/matches-queries.js && minify ./dist/splitByMediaQueryNew/matchMedia.js -d ./dist/splitByMediaQueryNew && minify ./dist/splitByMediaQueryOld/index.js -d ./dist/splitByMediaQueryOld && minify ./dist/splitByMediaQueryOld/matchMedia.js -d ./dist/splitByMediaQueryOld",
-    "build": "npm run transpile && npm run minify"
-  },
+  "scripts": {},
   "keywords": [
     "webpack",
     "media queries"
@@ -16,23 +12,15 @@
   "author": "Erin Lambroschini",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/elambro...."
+    "url": "git+https://github.com/elambro/extract-css-media-queries.git"
   },
-  "license": "ISC",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/elambro/extract-css-media-queries"
+  },
   "dependencies": {
     "clean-css": "^4.2.3",
     "css": "^3.0.0",
-    "print-message": "^3.0.1",
-    "webpack": "4.4.0",
-    "webpack-sources": "^1.4.3"
-  },
-  "devDependencies": {
-    "@babel/cli": "7.0.0",
-    "@babel/core": "7.0.0",
-    "@babel/preset-env": "7.0.0",
-    "babel-minify": "0.5.0"
-  },
-  "bugs": {
-    "url": "https://github.com/elambro..."
+    "print-message": "^3.0.1"
   }
 }
