@@ -18,7 +18,15 @@ const ExtractCssMediaQueries = require('@elambro/extract-css-media-queries');
 
 module.exports = {
   plugins: [
-    new ExtractCssMediaQueries()
+    new ExtractCssMediaQueries({
+      breakpoints: [{
+        minWidth: 768,
+        verbose : verbose, 
+        minify  : mix.inProduction(),
+        combined: true,
+        filename: `css/large.css`,
+     }]
+    })
   ],
   module: {
     rules: [
@@ -32,6 +40,7 @@ module.exports = {
   }
 };
 ````
+This will extract all media queries with a min-width greater or equal to 768 and extract them to the `css/large.css` file
 
 ### Options
 
