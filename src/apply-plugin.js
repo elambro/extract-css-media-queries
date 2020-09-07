@@ -7,6 +7,7 @@ function parseGroupsFromOptions(options)
   let options = {groups=[], breakpoints=null, verbose = false, minify = false, filename = null, combined = true, exclude = null, include = null};
   
   // Push the options down into each group as defaults
+  // If no groups, make a single group
   let groups = ( options.groups || [{breakpoints, verbose, minify, filename, combined, exclude, include}] )
   .map( group => ({
     breakpoints,
@@ -22,31 +23,30 @@ function parseGroupsFromOptions(options)
   return groups;
 }
 
-function filterAssetsForGroup(assets, options)
+function filterAssetsForGroup(sheets, options)
 {
-  let res = {};
-  let allowed = Object.keys(assets).filter( name => {
+  var res = {};
+  
+  Object.keys(sheets)
+  .filter( name => {
     if (options.excluded && name.matches(options.excluded)) return false;
     if (options.included && !name.matches(options.included)) return false;
     return true;
   })
-  allowed.forEach(name => {
-    let asset = assets[name]
-    let child   = asset.children && asset.children[0]
-    let stylesheet = typeof asset.source === 'function' ? asset.source() : (child || asset)._value
-    res[name] = stylesheet;
+  .forEach(name => {
+    res[name] = sheets[name]
   });
+
   return res;
 }
 
-function applyPlugin(assets, options)
+function applyPlugin(sheets, options)
 {
   let groups = parseGroupsFromOptions(options);
-  let files = {};
+  var files = {};
 
   groups.forEach( groupOptions => {
-
-    let subsheets = filterAssetsForGroup(assets, groupOptions);
+    let subsheets = filterAssetsForGroup(sheets, groupOptions);
     let newSheets = extractMediaQueries(subsheets, groupOptions);
     files = {...files, }
   })

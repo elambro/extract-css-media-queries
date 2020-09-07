@@ -1,4 +1,4 @@
-const handleApply = require('./handle-apply')
+const applyPlugin = require('./apply-plugin')
 
 module.exports = class MediaQuerySplittingPlugin {
 
@@ -15,9 +15,14 @@ module.exports = class MediaQuerySplittingPlugin {
       
       Object.keys(compilation.assets)
         .filter((asset) => /\.css$/.test(asset))
-        .forEach( name => { sheets[name] = compilation.assets[name]; });
+        .forEach( name => { 
+          let asset = compilation.assets[name]
+          let child = asset.children && asset.children[0]
+          let stylesheet = typeof asset.source === 'function' ? asset.source() : (child || asset)._value
+          sheets[name] = stylesheet; 
+        });
 
-      let results = applyPluginToSheets(sheets, this.options);
+      let results = applyPlugin(sheets, this.options);
 
       Object.keys(results)
         .forEach( filename => {
