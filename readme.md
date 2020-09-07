@@ -6,7 +6,7 @@ Based on [https://github.com/mike-diamond/media-query-splitting-plugin]
 ## Install
 
 ```bash
-`npm i -D extract-css-media-queries`
+`npm i -D @elambro/extract-css-media-queries`
 ```
 
 ## Usage
@@ -14,7 +14,7 @@ Based on [https://github.com/mike-diamond/media-query-splitting-plugin]
 ### webpack.config.js
 
 ```js
-const ExtractCssMediaQueries = require('extract-css-media-queries');
+const ExtractCssMediaQueries = require('@elambro/extract-css-media-queries');
 
 module.exports = {
   plugins: [
