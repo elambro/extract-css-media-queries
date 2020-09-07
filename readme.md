@@ -1,6 +1,6 @@
 # Extract CSS Media Queries
 
-[![npm version](https://badge.fury.io/js/%40elambro%2Fextract-css-media-queries.svg)](https://badge.fury.io/js/%40elambro%2Fextract-css-media-queries)
+[![npm version](https://badge.fury.io/js/%40elambro%2Fextract-css-media-queries.svg)](https://badge.fury.io/js/%40elambro%2Fextract-css-media-queries) [![GitHub version](https://badge.fury.io/gh/elambro%2Fextract-css-media-queries.svg)](https://badge.fury.io/gh/elambro%2Fextract-css-media-queries)
 
 ## Webpack plugin for extracting media queries from CSS files
 Based on [https://github.com/mike-diamond/media-query-splitting-plugin]
