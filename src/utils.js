@@ -43,16 +43,36 @@ function extractMatchingQueryStrings ({rules, queries, options})
 
 function sortBySize(a,b) 
 { 
-  const bySizeVar = (a,b) => 
-  {
-    if (!a && !b) return 0;
-    if (!a) return -1;
-    if (!b) return 1;
-    if (a < b) return -1;
-    if (a > b) return 1;
-    return 0;
+  if (a.size.width === null && b.size.width === null) {
+    if (a.size.height === null && b.size.height === null) {
+      return 0;
+    } else if (a.size.height === null) {
+      return -1;
+    } else if (b.size.height === null) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
-  return bySizeVar(a.width,b.width) || bySizeVar(a.height,b.height)
+
+  if (a.size.width === null) {
+    return -1;
+  }
+
+  if (b.size.width === null) {
+    return 1;
+  }
+
+  if (a.size.width < b.size.width) {
+    return -1;
+  }
+
+  if (a.size.width > b.size.width) {
+    return 1;
+  }
+
+  return 0;
+
 }
 
 /**
