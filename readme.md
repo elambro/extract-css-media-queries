@@ -10,6 +10,8 @@ Based on [https://github.com/mike-diamond/media-query-splitting-plugin]
 
 This package extracts media queries (e.g. `@media (min-size: 768px) {...}`) from your CSS into separate stylesheets which you can use to lower package sizes for your mobile users.
 
+The plugin will merge duplicate media query rules, ordered the rules from smallest to largest, and minify the output.
+
 You can then load this larger stylesheet(s) through a `<link>` tag:
 
 ```html
@@ -30,17 +32,21 @@ or load it dynamically through your js.
 ```js
 const ExtractCssMediaQueries = require('@elambro/extract-css-media-queries');
 
+const options = {
+  breakpoints: [
+    {
+      minWidth: 768,
+      verbose : false, 
+      minify  : true,
+      combined: true,
+      filename: `css/large.css`,
+   }
+ ]
+}
+
 module.exports = {
   plugins: [
-    new ExtractCssMediaQueries({
-      breakpoints: [{
-        minWidth: 768,
-        verbose : verbose, 
-        minify  : mix.inProduction(),
-        combined: true,
-        filename: `css/large.css`,
-     }]
-    })
+    new ExtractCssMediaQueries(options)
   ],
   module: {
     rules: [
@@ -76,10 +82,41 @@ let options = {
 
 ````
 
+#### Groups
+
+You can run separate options on different css files
+
+````js
+let options = {
+    groups: [
+      {
+        // group1
+        breakpoints:[1200]
+        include    : 'example1.css',
+        combined   : false
+      },
+      {
+        // group2
+        breakpoints:[768],
+        exclude    : 'example1.css',
+        combined   : true
+      }
+    ]
+}
+
+// group1 will extract media queries from example1.css and export as `example-1200.css`
+// group2 will extract media queries from everything but example1.css and combined them into a file `extracted-768.css`
+
+````
+
+#### Exclude / Include
+
+You can exclude or include input files for a group using the `include` and `exclude` properties. This will filter css files based on their input filename, using `filename.match(include)` and `!filename.match(exclude)`
+
 #### Breakpoints
 
 Specify breakpoints to extract into separate files. (Default is {minWidth: 768})
-All media queries that are larger than the minWidth or larger than the minHeight will be extracted.
+All media queries that are larger than the minWidth or larger than the minHeight will be extracted. Options `minify`, `combined`, `filename` and `verbose` can be used as an options property or as a breakpoint property.
 
 E.g. 
 ````js
@@ -106,31 +143,25 @@ E.g.
 }
 ````
 
-#### Groups
+#### Combined
 
-You can run separate options on different css files
+Combine the extracted media queries into a single CSS file, or create an extracted CSS file for each individual input (Default is true).
+When `{combined: false}`, you can use a `[name]` var in the `filename` option. e.g.
 
 ````js
-let options = {
-    groups: [
-      {
-        // group1
-        breakpoints:[1200]
-        include    : 'example1.css',
-        combined   : false
-      },
-      {
-        // group2
-        breakpoints:[768],
-        exclude    : 'example1.css',
-        combined   : true
-      }
-    ]
+{
+  breakpoints: [1200],
+  combined: false,
+  filename: 'css/[name]-[breakpoint].[ext]' // css/style.css => css/style-1200.css
 }
 
-// group1 will extract media queries from example1.css and export as `example-1200.css`
-// group2 will extract media queries from everything but example1.css and combined them into a file `extracted-768.css`
+// OR
 
+{
+  breakpoints: [800, 1200],
+  combined: true,
+  filename: 'css/extracted-[breakpoint].[ext]' // css/style1.css + css/style2.css => css/extracted-800.css & css/extracted-1200.css
+}
 ````
 
 ## Examples
