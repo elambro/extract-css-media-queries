@@ -8,6 +8,15 @@
 ## Webpack plugin for extracting media queries from CSS files
 Based on [https://github.com/mike-diamond/media-query-splitting-plugin]
 
+This package extracts media queries (e.g. `@media (min-size: 768px) {...}`) from your CSS into separate stylesheets which you can use to lower package sizes for your mobile users.
+
+You can then load this larger stylesheet(s) through a `<link>` tag:
+
+```html
+<link rel="stylesheet" media="screen and (min-width: 768px)" href="/style.css">
+```
+or load it dynamically through your js.
+
 ## Install
 
 ```bash
@@ -123,3 +132,18 @@ let options = {
 // group2 will extract media queries from everything but example1.css and combined them into a file `extracted-768.css`
 
 ````
+
+## Examples
+
+`const options = {breakpoints:[567,767]}`
+
+Will give you 3 files:
+-  `style.css`       - Common style, with all media queries `@media (min-width: 567px)` and higher extracted out. 
+- `style-767.css`  - Only media queries `@media(min-width: 767px)` and above. e.g. `@media(min-width: 800px)` is also included.
+- `style-567.css` -  Only media queries `@media(min-width: 567px)` up to `@media(min-width: 767px)`
+
+Duplicate media queries are merged in the results, then they're sorted with the highest `min-width` (and `min-height`) media queries at the bottom of the file. 
+
+## Laravel Mix
+
+Also see the [Laravel Mix extension](https://github.com/elambro/laravel-mix-extract-media-queries)
