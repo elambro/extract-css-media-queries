@@ -43,17 +43,45 @@ function getHash(str) {
   return hash.digest('hex').substr(0, 4)
 }
 
-function renameFile(filename, filecontents)
+function renameFile(filename, asset, options={})
 {
+  
+  if (false) { // options.hash) {
+
+    // @todo - Don't rename here because we 
+    // should also rename the associated .css.map
+
+    const { util: { createHash } } = require('webpack')
+
+    filename = filename.replace(/\\/g, '/');
+
+    let hashTemplate = typeof options.hash === 'string' ? options.hash : `[name].[contenthash:8].js`;
+    const REGEXP_CONTENTHASH = /\[contenthash(?::(\d+))?\]/i
+    const REGEXP_NAME = /\[name\]/i
+
+    let match = hashTemplate.match(REGEXP_CONTENTHASH);
+    let hashStr = match ? match[0] : false;
+    let hashLen = match ? match[1] : false;
+
+    var dirs        = filename.split(`/`);
+    var basename    = dirs.pop().replace('.css', '');
+    var contents    = asset.source();
+    var contenthash = hashStr ? getHash(contents) : '';
+    if (hashLen) {
+      contenthash = contenthash.substr(0, hashLen);
+    }
+
+    let newFilename = hashTemplate
+    .replace('[name]',basename)
+    .replace('[ext]', 'css')
+    .replace(hashStr, contenthash)
+    .replace(/^[\\/]|[\\/]$/g, '') // remove leading & trailing slashes
+
+    return `${dirs.join(`/`)}/${newFilename}`;
+  }
+
   return filename;
 
-  // @todo
-
-  const { util: { createHash } } = require('webpack')
-  return 
-    filename
-    .replace('[ext]', 'css')
-    .replace('[contenthash]', getHash(filecontents));
 }
 
 function extractMediaQueries(sheets, options)
@@ -115,8 +143,8 @@ function applyPlugin(sheets, options)
 
   var renamed = {};
   Object.keys(files).forEach(filename => {
-    let contents = files[filename];
-    renamed[ renameFile(filename, contents)] = contents;
+    let asset = files[filename];
+    renamed[ renameFile(filename, asset, options)] = asset;
   })
 
   return renamed;
