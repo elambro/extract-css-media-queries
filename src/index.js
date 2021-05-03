@@ -8,7 +8,7 @@ module.exports = class MediaQuerySplittingPlugin {
 
   apply(compiler) {
 
-    compiler.plugin('emit', (compilation, callback) => {
+    compiler.hooks.emit.tapAsync('emit', (compilation, callback) => {
 
       // get stylesheets
       let sheets = {};
