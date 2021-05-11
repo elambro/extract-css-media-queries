@@ -1,13 +1,18 @@
 {
   "name": "@elambro/extract-css-media-queries",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "A webpack plugin which extracts media queries from your css into separate files",
   "homepage": "https://lambroschini.com/",
   "main": "src/index.js",
   "scripts": {},
   "keywords": [
     "webpack",
-    "media queries"
+    "plugin",
+    "media queries",
+    "extract",
+    "split",
+    "css",
+    "@media"
   ],
   "author": "Erin Lambroschini",
   "repository": {
@@ -19,7 +24,7 @@
     "url": "https://github.com/elambro/extract-css-media-queries"
   },
   "dependencies": {
-    "clean-css": "^4.2.3",
+    "clean-css": "^5.1.2",
     "css": "^3.0.0",
     "print-message": "^3.0.1"
   }
