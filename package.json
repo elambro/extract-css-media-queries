@@ -1,6 +1,6 @@
 {
   "name": "@elambro/extract-css-media-queries",
-  "version": "0.2.0",
+  "version": "0.1.2",
   "description": "A webpack plugin which extracts media queries from your css into separate files",
   "homepage": "https://lambroschini.com/",
   "main": "src/index.js",
