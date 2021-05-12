@@ -1,17 +1,18 @@
 const {StyleRules, Breakpoint} = require('./classes')
-const printMessage = require('print-message')
+const printMessage = require('print-message') // @todo replace with `chalk`
+const createHash = require('webpack/lib/util/createHash');
 
 function parseGroupsFromOptions(options)
 {
   let defaults = {
-    breakpoints: null, 
+    breakpoints: null,
     verbose    : false,
     minify     : false,
-    filename   : null, 
+    filename   : null,
     combined   : true,
     exclude    : null,
     include    : null,
-    ...options, 
+    ...options,
   };
   delete defaults.groups;
 
@@ -23,7 +24,7 @@ function parseGroupsFromOptions(options)
 function filterAssetsForGroup(sheets, options)
 {
   var res = {};
-  
+
   Object.keys(sheets)
   .filter( name => {
     if (options.exclude && name.match(options.exclude)) return false;
@@ -37,25 +38,23 @@ function filterAssetsForGroup(sheets, options)
   return res;
 }
 
-function getHash(str) {
+function getHash(str, len=6) {
   const hash = createHash('md4')
   hash.update(str)
-  return hash.digest('hex').substr(0, 4)
+  return hash.digest('hex').substr(0, len)
 }
 
-function renameFile(filename, asset, options={})
+function renameFile(filename, asset, options={}, groupOptions={})
 {
-  
-  if (false) { // options.hash) {
+  const hash = groupOptions.hash || hash;
 
-    // @todo - Don't rename here because we 
-    // should also rename the associated .css.map
+  if (hash) {
 
-    const { util: { createHash } } = require('webpack')
+    // See https://github.com/scinos/webpack-plugin-hash-output/blob/master/src/OutputHash.js
 
     filename = filename.replace(/\\/g, '/');
 
-    let hashTemplate = typeof options.hash === 'string' ? options.hash : `[name].[contenthash:8].js`;
+    let hashTemplate = typeof hash === 'string' ? hash : `[name].[contenthash:8].js`;
     const REGEXP_CONTENTHASH = /\[contenthash(?::(\d+))?\]/i
     const REGEXP_NAME = /\[name\]/i
 
@@ -66,10 +65,7 @@ function renameFile(filename, asset, options={})
     var dirs        = filename.split(`/`);
     var basename    = dirs.pop().replace('.css', '');
     var contents    = asset.source();
-    var contenthash = hashStr ? getHash(contents) : '';
-    if (hashLen) {
-      contenthash = contenthash.substr(0, hashLen);
-    }
+    var contenthash = hashStr ? getHash(contents, hashLen) : '';
 
     let newFilename = hashTemplate
     .replace('[name]',basename)
@@ -125,7 +121,7 @@ function extractMediaQueries(sheets, options)
   options.verbose && printMessage(['Exporting: ', `---------------------`, ...Object.keys(output)])
 
   let res = {};
-  Object.keys(output).forEach(name => { res[name] = output[name].toStylesheet() }); 
+  Object.keys(output).forEach(name => { res[name] = output[name].toStylesheet() });
   return res;
 }
 
@@ -138,16 +134,20 @@ function applyPlugin(sheets, options)
   groups.forEach( groupOptions => {
     let subsheets = filterAssetsForGroup(sheets, groupOptions);
     let newSheets = extractMediaQueries(subsheets, groupOptions);
-    files = {...files, ...newSheets}
+    let existing  = Object.keys(subsheets);
+    let renamed   = {};
+
+    // Hash the names of any new sheets if needed
+    Object.keys(newSheets).forEach(filename => {
+      let asset = newSheets[filename];
+      let name  = existing.includes(filename) ? filename : renameFile(filename, asset, options, groupOptions)
+      renamed[name] = asset;
+    })
+
+    files = {...files, ...renamed}
   })
 
-  var renamed = {};
-  Object.keys(files).forEach(filename => {
-    let asset = files[filename];
-    renamed[ renameFile(filename, asset, options)] = asset;
-  })
-
-  return renamed;
+  return files;
 }
 
 module.exports = applyPlugin;

@@ -27,5 +27,8 @@
     "clean-css": "^5.1.2",
     "css": "^3.0.0",
     "print-message": "^3.0.1"
+  },
+  "devDependencies": {
+    "webpack": "^5.37.0"
   }
 }
