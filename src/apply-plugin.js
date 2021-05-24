@@ -1,10 +1,10 @@
 const {StyleRules, Breakpoint} = require('./classes')
 const printMessage = require('print-message') // @todo replace with `chalk`
-const createHash = require('webpack/lib/util/createHash');
 
 function parseGroupsFromOptions(options)
 {
   let defaults = {
+    hash       : null,
     breakpoints: null,
     verbose    : false,
     minify     : false,
@@ -38,47 +38,6 @@ function filterAssetsForGroup(sheets, options)
   return res;
 }
 
-function getHash(str, len=6) {
-  const hash = createHash('md4')
-  hash.update(str)
-  return hash.digest('hex').substr(0, len)
-}
-
-function renameFile(filename, asset, options={}, groupOptions={})
-{
-  const hash = groupOptions.hash || hash;
-
-  if (hash) {
-
-    // See https://github.com/scinos/webpack-plugin-hash-output/blob/master/src/OutputHash.js
-
-    filename = filename.replace(/\\/g, '/');
-
-    let hashTemplate = typeof hash === 'string' ? hash : `[name].[contenthash:8].js`;
-    const REGEXP_CONTENTHASH = /\[contenthash(?::(\d+))?\]/i
-    const REGEXP_NAME = /\[name\]/i
-
-    let match = hashTemplate.match(REGEXP_CONTENTHASH);
-    let hashStr = match ? match[0] : false;
-    let hashLen = match ? match[1] : false;
-
-    var dirs        = filename.split(`/`);
-    var basename    = dirs.pop().replace('.css', '');
-    var contents    = asset.source();
-    var contenthash = hashStr ? getHash(contents, hashLen) : '';
-
-    let newFilename = hashTemplate
-    .replace('[name]',basename)
-    .replace('[ext]', 'css')
-    .replace(hashStr, contenthash)
-    .replace(/^[\\/]|[\\/]$/g, '') // remove leading & trailing slashes
-
-    return `${dirs.join(`/`)}/${newFilename}`;
-  }
-
-  return filename;
-
-}
 
 function extractMediaQueries(sheets, options)
 {
@@ -131,18 +90,22 @@ function applyPlugin(sheets, options)
 
   var files = {};
 
+  // @todo How do we add in the source map?
+
   groups.forEach( groupOptions => {
     let subsheets = filterAssetsForGroup(sheets, groupOptions);
     let newSheets = extractMediaQueries(subsheets, groupOptions);
     let existing  = Object.keys(subsheets);
     let renamed   = {};
 
-    // Hash the names of any new sheets if needed
-    Object.keys(newSheets).forEach(filename => {
-      let asset = newSheets[filename];
-      let name  = existing.includes(filename) ? filename : renameFile(filename, asset, options, groupOptions)
-      renamed[name] = asset;
-    })
+    // Use the hashed names as keys
+    Object.entries(newSheets)
+      .forEach(([pathname, asset]) => {
+        asset.extracted = !existing.includes(pathname);
+        let name = (asset.extracted ? asset.hashedName : asset.original ) || asset.original;
+        asset.immutable = asset.extracted && name.includes(asset.contenthash);
+        renamed[name] = asset;
+      });
 
     files = {...files, ...renamed}
   })
